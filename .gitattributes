@@ -1,1 +1,2 @@
-* linguist-vendored=false
+*.ipynb linguist-language=python
+*.RMD linguist-language=R
