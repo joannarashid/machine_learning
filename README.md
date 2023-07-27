@@ -1,5 +1,5 @@
-# machinelearning
-mini machine learning projects
+# Machine Learning
+mini projects with popular machine learning models
 
 <a href="https://joannarashid](https://github.com/joannarashid/machine_learning/blob/main/cc_app_predict.md">Predicting Credit Card Appplication Approval</a>: ksvm classifier model trained on credit card applicant data
 
