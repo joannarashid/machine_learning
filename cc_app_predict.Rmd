@@ -1,0 +1,111 @@
+---
+title: "predict_credit_approval"
+author: "Joanna Rashid"
+date: '2021-11-26'
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Credit Card Data
+```{r}
+library(rmarkdown)
+
+cc_data <- read.delim("/Users/joannarashid/Documents/Documents - Joanna’s MacBook Pro/School/ISYE6501/credit_card_data.txt", #creating df
+                      stringsAsFactors = FALSE, 
+                      header=FALSE) 
+data <- as.matrix(cc_data) #creating matrix
+
+data[,11] = factor(data[,11])
+
+head(data)
+
+summary(data)
+```
+
+## Creating SVM model and calculating coefficients and intercept:
+```{r}
+library(kernlab)
+library(caret)
+```
+
+```{r}
+set.seed(2) 
+
+C = c(.001, .01, .1, 1, 10, 100, 1000) #Values of C to be tested
+model_list = c()
+conf_matrix_list = c()
+modelling_result = NULL
+
+# call ksvm in a loop to test several value of C.  
+# Vanilladot is a simple linear kernel.  
+for (i in C){
+model <- ksvm(data[,1:10],
+              data[,11],
+              type='C-svc',
+              kernel='vanilladot',
+              C=i,
+              scaled=TRUE)
+pred <- predict(model,data[,1:10])
+
+cat(sprintf('\n---------------------------\n'))
+cat(sprintf('C: %.6f\n', i))
+
+conf_matrix = confusionMatrix(factor(pred), factor(data[,11]))
+accuracy = conf_matrix[['overall']][['Accuracy']] * 100
+f1_score = conf_matrix[['byClass']][['F1']] * 100
+
+print(conf_matrix[["table"]])
+cat(sprintf('Accuracy: %.2f %%\tF1 Score: %.2f %%\n', accuracy, f1_score))
+
+model_list = c(model_list, model)
+conf_matrix_list = c(conf_matrix_list, conf_matrix)
+modelling_result = rbind(modelling_result, data.frame(i, accuracy, f1_score))
+print(paste("Percent of model's prediction match actual value for C=", 
+            i,
+            "is", 
+            sum(pred == data[,11]) / nrow(data)))
+}
+```
+
+```{r}
+#plot accuracy and F1 score
+ggplot(data = modelling_result, aes(x=i, y=f1_score)) +
+geom_line(linetype = "dashed") + geom_point() +
+labs(x='C', y ='F1 Score (%)')
+```
+
+```{r}
+ggplot(data=modelling_result, aes(x=i, y=accuracy)) +
+geom_line(linetype = "dashed") + geom_point() +
+labs(x='C', y='Accuracy (%)')
+```
+
+
+```{r}
+#model with C=1
+model <- ksvm(data[,1:10],
+              data[,11],
+              type='C-svc',
+              kernel='vanilladot',
+              C=1,scaled=TRUE)
+
+# calculate a1…am
+a <- colSums(model@xmatrix[[1]] * model@coef[[1]])
+a
+
+# calculate a0
+a0 <- -model@b
+a0
+```
+The kvsm classifier produces the following model:
+
+$(.08148382 -0.0011026642 V1 - 0.0008980539 V2 - 0.0016074557 V3 + 0.0029041700 V4 + 1.0047363456 V5$ 
+$- 0.0029852110 V6 - 0.0002035179 V7 - 0.0005504803 V8 - 0.0012519187 V9 + 0.1064404601 V10 + 0.08148382)1 = 0$
+
+## Conclusion 
+
+A ksvm classifier model trained on this data accurately predicts credit card approval for approximately 86% of applicants when C = 1 and when C=100. 86% is the highest level of accuracy achieved amoung tested values of C. Lower values of C classify a wider range of applications and higher values represent a more narrow margin. So it seems that 1 is a better choice than 100 since the margin for classifying points will be wider with the same classification accuracy.
