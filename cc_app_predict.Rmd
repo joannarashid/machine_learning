@@ -5,11 +5,6 @@ date: '2021-11-26'
 output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
 ## Credit Card Data
 ```{r}
 library(rmarkdown)
