@@ -5,4 +5,4 @@ This repo contains mini projects using popular machine learning models. Projects
 
 <a href="Lin_Reg_PCA.md">PredictionCrime Rates</a>:Linear Regression and PCA
 
-<a href="imputation_methods.md">PredictionCrime Rates</a>:Imputation Methods
+<a href="imputation_methods.md">Imputation Methods</a>
